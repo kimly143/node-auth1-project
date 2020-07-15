@@ -1,0 +1,26 @@
+{
+  "name": "auth1-project",
+  "version": "1.0.0",
+  "description": "## Topics",
+  "main": "index.js",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.17.1",
+    "knex": "^0.21.2",
+    "sqlite3": "^5.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kimly143/node-auth1-project.git"
+  },
+  "author": "kimly143",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kimly143/node-auth1-project/issues"
+  },
+  "homepage": "https://github.com/kimly143/node-auth1-project#readme"
+}
