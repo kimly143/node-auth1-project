@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const session = require('express-session');
+
 const db = require('./data/userDb');
 
 const app = express();
@@ -65,6 +67,21 @@ function validateLogin(req, res, next) {
 	}
 	next();
 }
+
+//session
+server.use(
+    session({
+        name: 'notsession', // default is connect.sid
+        secret: 'correct horse battery staple!',
+        cookie: {
+        maxAge: 1 * 24 * 60 * 60 * 1000,
+        secure: true, // only set cookies over https. Server will not send back a cookie over http.
+        }, // 1 day in milliseconds
+        httpOnly: true, // don't let JS code access cookies. Browser extensions run JS code on your browser!
+        resave: false,
+        saveUninitialized: false,
+    })
+);
 
 const port = process.env.PORT || 4040;
 
