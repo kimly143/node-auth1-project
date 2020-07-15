@@ -58,7 +58,9 @@ app.post('/api/login', validateLogin, async (req, res) => {
 	}
 });
 
-app.get('/api/users', loadUserFromSession, async (req, res) => {
+app.use('/api/users', loadUserFromSession);
+
+app.get('/api/users', async (req, res) => {
 	try {
 		const users = await db.getAllUsers();
 		res.status(200).json(users);
