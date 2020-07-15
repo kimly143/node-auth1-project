@@ -22,19 +22,22 @@ app.post('/api/register', validateUser, async (req, res) => {
 	}
 });
 
-app.post("/api/login", validateLogin, async (req,res) => {
-    try {
-		const data = {
-			username: req.body.username,
-			password: bcrypt.hashSync(req.body.password, 10)
-		};
-		const newUser = await db.createUser(data);
-		res.status(201).json(newUser);
+app.post('/api/login', validateLogin, async (req, res) => {
+	try {
+		const user = await db.getUserByUsername(req.body.username);
+		if (!user) {
+			return res.status(422).json({ error: 'Failed to login' });
+		}
+		//username matched
+		if (!bcrypt.compareSync(req.body.password, user.password)) {
+			return res.status(422).json({ error: 'Failed to login' });
+		}
+		res.status(200).end();
 	} catch (e) {
 		console.error(e);
 		res.status(500).json({ error: 'Failed to create user' });
 	}
-})
+});
 
 // middleware
 
@@ -57,8 +60,8 @@ function validateUser(req, res, next) {
 function validateLogin(req, res, next) {
 	if (!req.body.username || !req.body.password) {
 		return res.status(422).json({
-			error: 'You shall not pass!'
-        });
+			error: 'username and password are required to login'
+		});
 	}
 	next();
 }
