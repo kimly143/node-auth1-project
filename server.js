@@ -10,6 +10,21 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+//session
+app.use(
+	session({
+		name: 'sid',
+		secret: 'correct horse battery staple!',
+		cookie: {
+			maxAge: 1 * 24 * 60 * 60 * 1000,
+			secure: process.env.NODE_ENV === 'production'
+		},
+		httpOnly: true,
+		resave: false,
+		saveUninitialized: false
+	})
+);
+
 app.post('/api/register', validateUser, async (req, res) => {
 	try {
 		const data = {
@@ -34,11 +49,27 @@ app.post('/api/login', validateLogin, async (req, res) => {
 		if (!bcrypt.compareSync(req.body.password, user.password)) {
 			return res.status(422).json({ error: 'you shall not pass!' });
 		}
+		req.session.userId = user.id;
+		req.session.save();
 		res.status(200).end();
 	} catch (e) {
 		console.error(e);
 		res.status(500).json({ error: 'you shall not pass!' });
 	}
+});
+
+app.get('/api/users', loadUserFromSession, async (req, res) => {
+	try {
+		const users = await db.getAllUsers();
+		res.status(200).json(users);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to load users!' });
+	}
+
+	return res.status(403).json({
+		error: 'you shall not pass!'
+	});
 });
 
 // middleware
@@ -68,20 +99,23 @@ function validateLogin(req, res, next) {
 	next();
 }
 
-//session
-server.use(
-    session({
-        name: 'notsession', // default is connect.sid
-        secret: 'correct horse battery staple!',
-        cookie: {
-        maxAge: 1 * 24 * 60 * 60 * 1000,
-        secure: true, // only set cookies over https. Server will not send back a cookie over http.
-        }, // 1 day in milliseconds
-        httpOnly: true, // don't let JS code access cookies. Browser extensions run JS code on your browser!
-        resave: false,
-        saveUninitialized: false,
-    })
-);
+//load user from session
+async function loadUserFromSession(req, res, next) {
+	if (!req.session.userId) {
+		console.log('no user id');
+		return res.status(403).json({
+			error: 'you shall not pass!'
+		});
+	}
+	try {
+		const user = await db.getUserById(req.session.userId);
+		req.user = user;
+		next();
+	} catch (e) {
+		console.error(e);
+		res.status(403).json({ error: 'you shall not pass!' });
+	}
+}
 
 const port = process.env.PORT || 4040;
 
