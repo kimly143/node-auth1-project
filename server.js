@@ -26,16 +26,16 @@ app.post('/api/login', validateLogin, async (req, res) => {
 	try {
 		const user = await db.getUserByUsername(req.body.username);
 		if (!user) {
-			return res.status(422).json({ error: 'Failed to login' });
+			return res.status(422).json({ error: 'you shall not pass!' });
 		}
 		//username matched
 		if (!bcrypt.compareSync(req.body.password, user.password)) {
-			return res.status(422).json({ error: 'Failed to login' });
+			return res.status(422).json({ error: 'you shall not pass!' });
 		}
 		res.status(200).end();
 	} catch (e) {
 		console.error(e);
-		res.status(500).json({ error: 'Failed to create user' });
+		res.status(500).json({ error: 'you shall not pass!' });
 	}
 });
 
