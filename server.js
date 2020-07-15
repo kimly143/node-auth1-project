@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const db = require('./data/userDb');
+
 const app = express();
 
 app.use(express.json());
@@ -20,7 +22,23 @@ app.post('/api/register', validateUser, async (req, res) => {
 	}
 });
 
+app.post("/api/login", validateLogin, async (req,res) => {
+    try {
+		const data = {
+			username: req.body.username,
+			password: bcrypt.hashSync(req.body.password, 10)
+		};
+		const newUser = await db.createUser(data);
+		res.status(201).json(newUser);
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ error: 'Failed to create user' });
+	}
+})
+
 // middleware
+
+//validateUser
 function validateUser(req, res, next) {
 	if (!req.body.username || !req.body.password) {
 		return res.status(422).json({
@@ -31,6 +49,16 @@ function validateUser(req, res, next) {
 		return res.status(422).json({
 			error: 'please make sure password and confirm password are matching'
 		});
+	}
+	next();
+}
+
+//validateLogin
+function validateLogin(req, res, next) {
+	if (!req.body.username || !req.body.password) {
+		return res.status(422).json({
+			error: 'You shall not pass!'
+        });
 	}
 	next();
 }
